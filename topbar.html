@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<!-- saved from url=(0060)https://jacknicholsan.github.io/betvoy/betwoy-top.html?v=123 -->
+<html lang="tr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Betvoy Topbar</title>
+    <!-- Poppins: header (web.css) ile aynı tipografi. iframe ayrı bir doküman
+         olduğu için üst sayfanın fontunu MİRAS ALMAZ — burada ayrıca yüklenmeli,
+         yoksa font-family sessizce Arial'a düşer. preconnect ilk boyamayı hızlandırır. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link href="./topbar_files/css2" rel="stylesheet">
+    <style>
+        /* --- 1. TEMEL ---
+           Değerler web.css'teki paletle BİREBİR aynı tutuluyor:
+           bar header'ın hemen altında duruyor, en ufak sapma dikiş gibi görünür.
+             --cs-main-color          #1FB6EC   (1 - Main)
+             --cs-button-second-color #43D6FF   (2 - Button Second)
+             --cs-header-color        #10151C   (4 - Header)
+             --cs-skin-color          #151820   (6 - Skin)
+             --bv-text     rgba(255,255,255,.82)
+             --bv-icon     rgba(255,255,255,.55)
+             --bv-line     rgba(255,255,255,.09)
+             font          Poppins 12.5px          radius 8px
+           Bunlardan biri web.css'te değişirse BURASI da elle güncellenmeli —
+           iframe olduğu için ortak değişken paylaşılamıyor. */
+        :root {
+            --accent:   #1FB6EC;   /* --cs-main-color: sitenin ana mavisi */
+            --gold:     #43D6FF;   /* --cs-button-second-color: açık mavi, ikincil bilgi */
+            --flat-bg:  #10151C;   /* --cs-header-color: header ile AYNI */
+            --ink:      rgba(255, 255, 255, .82);
+            --ink-hi:   #ffffff;
+            --muted:    rgba(255, 255, 255, .55);
+            --line:     rgba(255, 255, 255, .09);
+            --radius:   8px;
+            --pad:      14px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--flat-bg);
+            font-family: "Poppins", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- BAR — FLAT ---
+           Eski hali camdı: grain + sheen + renk tint + koyu taban + iç
+           highlight. Hepsi kaldırıldı — flat dilde TEK düz renk var; süs
+           katmanı eklendiği anda header'la arasındaki bütünlük bozulur.
+           (backdrop-filter zaten iframe'de çalışmıyor, o not artık gereksiz.) */
+        .bar {
+            position: relative;
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+            height: 100%;
+            background: var(--flat-bg);
+            border-top: 1px solid var(--line);
+            border-bottom: 1px solid rgba(31, 182, 236, .55);  /* --cs-main-color, header'ın alt çizgisiyle aynı dil */
+            box-shadow: none;
+        }
+
+        /* --- 2. PIN (sabit domain) ---
+           Flat: gradient panel yerine ince ayraç. Menüdeki haplarla aynı dil. */
+        .pin {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 0 0 auto;
+            padding: 0 var(--pad);
+            background: transparent;
+            border-right: 1px solid var(--line);
+            box-shadow: none;
+        }
+
+        /* Canlı nokta: glow YOK (flat), sadece opaklık nabzı */
+        .live {
+            flex: 0 0 auto;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%      { opacity: .35; }
+        }
+
+        .pin-group {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .pin-label {
+            font-size: 9px;
+            font-weight: 500;
+            line-height: 1;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .pin-domain {
+            font-size: 12.5px;      /* header menüsüyle aynı */
+            font-weight: 600;
+            line-height: 1.15;
+            color: var(--ink-hi);
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Sonraki domain: düz mavi (--cs-main-color) — flat zeminde okunuyor,
+           açık türeve gerek yok, glow da yok. */
+        .pin-domain.accent { color: var(--accent); }
+
+        .pin-arrow {
+            color: rgba(255, 255, 255, .28);
+            font-size: 13px;
+            line-height: 1;
+        }
+
+        /* --- 3. ŞERİT (kayan) --- */
+        .strip {
+            position: relative;
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            -webkit-mask-image: linear-gradient(to right,
+                        transparent 0, #000 24px,
+                        #000 calc(100% - 24px), transparent 100%);
+                    mask-image: linear-gradient(to right,
+                        transparent 0, #000 24px,
+                        #000 calc(100% - 24px), transparent 100%);
+        }
+
+        .strip-track {
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            will-change: transform;
+            animation: marquee var(--dur, 20s) linear infinite;
+        }
+
+        @keyframes marquee {
+            from { transform: translate3d(0, 0, 0); }
+            to   { transform: translate3d(calc(-1 * var(--dist, 0px)), 0, 0); }
+        }
+
+        .strip:hover .strip-track { animation-play-state: paused; }
+
+        .chunk { display: inline-flex; align-items: center; }
+
+        .item {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0 var(--pad);
+        }
+
+        .ico { font-size: 12px; line-height: 1; }
+
+        /* Maç etiketi: açık mavi (--cs-button-second-color) — ana mavi eylem
+           rengi, açık mavi ikincil bilgi. Header'daki BONUS butonuyla aynı hiyerarşi. */
+        .tag {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+
+        /* text-shadow YOK: flat zeminde gerek yok. Cam versiyonunda
+           okunabilirliği gölge taşıyordu çünkü site altından sızıyordu;
+           artık zemin düz #10151C, kontrast zaten yeterli. */
+        .val, .slogan {
+            font-size: 12.5px;
+            font-weight: 500;
+            color: var(--ink);
+        }
+
+        .sep { color: rgba(255, 255, 255, .22); font-size: 11px; }
+
+        /* --- 4. MOBİL: pin kısalır, sadece SONRAKİ --- */
+        @media (max-width: 480px) {
+            :root { --pad: 10px; }
+            #pin-current, .pin-arrow { display: none; }
+            .pin { gap: 8px; }
+            .tag { display: none; }
+        }
+
+        /* --- 5. ERİŞİLEBİLİRLİK --- */
+        @media (prefers-reduced-motion: reduce) {
+            .strip-track { animation: none; }
+            .live { animation: none; }
+        }
+
+        /* NOT: Eski "açık zeminli site anahtarı" (.light) SİLİNDİ.
+           Cam versiyonda gerekiyordu çünkü zemin yarı şeffaftı ve sitenin
+           arka planı sızıyordu — açık zeminli sitede beyaz yazı okunmuyordu.
+           Bar artık düz #10151C taşıyor, hangi sitede olursa olsun koyu.
+           Anahtar işlevsiz kalmıştı, ölü kod olarak durmasın. */
+    </style>
+</head>
+<body>
+
+    <div class="bar">
+        <div class="pin">
+            <span class="live"></span>
+            <div class="pin-group" id="pin-current">
+                <span class="pin-label">Güncel</span>
+                <span class="pin-domain" id="dom-current">jacknicholsan.github.io</span>
+            </div>
+            <span class="pin-arrow">→</span>
+            <div class="pin-group">
+                <span class="pin-label">Sonraki</span>
+                <span class="pin-domain accent" id="dom-next">jacknicholsan.github.io</span>
+            </div>
+        </div>
+
+        <div class="strip" id="strip">
+            <div class="strip-track" id="track" style="--dist: 162.21875px; --dur: 3.604861111111111s;">
+                <span class="chunk">
+                    
+                    <span class="item"><span class="slogan">🚀 #BETVOYkazandırır</span></span>
+                    <span class="sep">•</span>
+                </span>
+            
+                <span class="chunk">
+                    
+                    <span class="item"><span class="slogan">🚀 #BETVOYkazandırır</span></span>
+                    <span class="sep">•</span>
+                </span>
+            
+                <span class="chunk">
+                    
+                    <span class="item"><span class="slogan">🚀 #BETVOYkazandırır</span></span>
+                    <span class="sep">•</span>
+                </span>
+            
+                <span class="chunk">
+                    
+                    <span class="item"><span class="slogan">🚀 #BETVOYkazandırır</span></span>
+                    <span class="sep">•</span>
+                </span>
+            
+                <span class="chunk">
+                    
+                    <span class="item"><span class="slogan">🚀 #BETVOYkazandırır</span></span>
+                    <span class="sep">•</span>
+                </span>
+            
+                <span class="chunk">
+                    
+                    <span class="item"><span class="slogan">🚀 #BETVOYkazandırır</span></span>
+                    <span class="sep">•</span>
+                </span>
+            
+                <span class="chunk">
+                    
+                    <span class="item"><span class="slogan">🚀 #BETVOYkazandırır</span></span>
+                    <span class="sep">•</span>
+                </span>
+            
+                <span class="chunk">
+                    
+                    <span class="item"><span class="slogan">🚀 #BETVOYkazandırır</span></span>
+                    <span class="sep">•</span>
+                </span>
+            
+                <span class="chunk">
+                    
+                    <span class="item"><span class="slogan">🚀 #BETVOYkazandırır</span></span>
+                    <span class="sep">•</span>
+                </span>
+            
+                <span class="chunk">
+                    
+                    <span class="item"><span class="slogan">🚀 #BETVOYkazandırır</span></span>
+                    <span class="sep">•</span>
+                </span>
+            
+                <span class="chunk">
+                    
+                    <span class="item"><span class="slogan">🚀 #BETVOYkazandırır</span></span>
+                    <span class="sep">•</span>
+                </span>
+            
+                <span class="chunk">
+                    
+                    <span class="item"><span class="slogan">🚀 #BETVOYkazandırır</span></span>
+                    <span class="sep">•</span>
+                </span>
+            
+                <span class="chunk">
+                    
+                    <span class="item"><span class="slogan">🚀 #BETVOYkazandırır</span></span>
+                    <span class="sep">•</span>
+                </span>
+            
+                <span class="chunk">
+                    
+                    <span class="item"><span class="slogan">🚀 #BETVOYkazandırır</span></span>
+                    <span class="sep">•</span>
+                </span>
+            
+                <span class="chunk">
+                    
+                    <span class="item"><span class="slogan">🚀 #BETVOYkazandırır</span></span>
+                    <span class="sep">•</span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        // --- AYARLAR ---
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/19aDuV5ByuFWBaSxjXXupjYAXoFjv-JW2CwOl1pDXzOY/export?format=csv";
+        const SLOGAN    = "🚀 #BETVOYkazandırır";
+        const SPEED     = 45; // px / saniye — ekran tazeleme oranından bağımsız
+
+        // GLOBAL DEĞİŞKENLER
+        let CACHED_DOMAIN = { current: "Betvoy", next: "Betvoy" };
+        let MAC_DETAY = "";
+        let lastSignature = null;
+
+        const strip      = document.getElementById('strip');
+        const track      = document.getElementById('track');
+        const domCurrent = document.getElementById('dom-current');
+        const domNext    = document.getElementById('dom-next');
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[c]);
+        }
+
+        // --- 1. DOMAIN BULUCU (Sadece 1 Kere Çalışır ve Kaydeder) ---
+        function initDomain() {
+            try {
+                let host = (window.location !== window.parent.location)
+                           ? document.referrer
+                           : document.location.hostname;
+
+                // Temizlik
+                host = host.replace('https://', '').replace('http://', '').split('/')[0].replace(/^www\.|^m\./, '');
+
+                // Netlify veya boş gelirse varsayılanı koru, yoksa güncelle
+                if (host && !host.includes('netlify') && !host.includes('tiiny') && host !== "") {
+                    let next = host;
+                    const match = host.match(/(\d+)/);
+                    if (match) {
+                        next = host.replace(match[0], parseInt(match[0]) + 1);
+                    }
+                    CACHED_DOMAIN = { current: host, next: next };
+                }
+            } catch(e) { console.log("Domain alınamadı"); }
+        }
+
+        function renderPin() {
+            domCurrent.textContent = CACHED_DOMAIN.current;
+            domNext.textContent    = CACHED_DOMAIN.next;
+        }
+
+        // --- 2. ŞERİT İÇERİĞİ ---
+        // Ayraç chunk'ın İÇİNDE — böylece bir chunk genişliği kadar kaydırmak
+        // kusursuz/dikişsiz bir döngü verir.
+        function chunkHTML() {
+            let matchHTML = "";
+            if (MAC_DETAY && MAC_DETAY.length > 1) {
+                matchHTML = `
+                    <span class="item">
+                        <span class="ico">⚽</span>
+                        <span class="tag">Günün Süper Oranlı Maçı</span>
+                        <span class="val">${escapeHtml(MAC_DETAY)}</span>
+                    </span>
+                    <span class="sep">•</span>
+                `;
+            }
+            return `
+                <span class="chunk">
+                    ${matchHTML}
+                    <span class="item"><span class="slogan">${SLOGAN}</span></span>
+                    <span class="sep">•</span>
+                </span>
+            `;
+        }
+
+        // --- 3. ŞERİT KURULUMU ---
+        // Kopya sayısı ölçülerek hesaplanır (sabit sayı değil), süre içerik
+        // genişliğinden türetilir → her ekranda aynı okuma hızı.
+        function buildStrip() {
+            track.innerHTML = chunkHTML();
+            const first = track.firstElementChild;
+            if (!first) return;
+
+            // getBoundingClientRect: offsetWidth'in aksine tam sayıya yuvarlamaz,
+            // yuvarlama olsa döngüde birikip dikiş kayması yapardı.
+            const chunkW = first.getBoundingClientRect().width;
+            if (!chunkW) return;
+
+            const stripW = strip.getBoundingClientRect().width;
+            const copies = Math.max(2, Math.ceil(stripW / chunkW) + 1);
+
+            track.innerHTML = chunkHTML().repeat(copies);
+            track.style.setProperty('--dist', chunkW + 'px');
+            track.style.setProperty('--dur', (chunkW / SPEED) + 's');
+
+            // Animasyonu baştan başlat
+            track.style.animation = 'none';
+            void track.offsetWidth;
+            track.style.animation = '';
+
+            lastSignature = MAC_DETAY;
+        }
+
+        // --- 4. VERİ GÜNCELLEME (Sayfayı Yenilemeden) ---
+        async function updateData() {
+            try {
+                const response = await fetch(SHEET_URL + '&t=' + Date.now());
+                if (response.ok) {
+                    const text = await response.text();
+                    const cleanText = text.split('\n')[0].replace(/['"]+/g, '').trim();
+
+                    // Tarih Kontrolü
+                    if (cleanText.includes('|')) {
+                        const parts = cleanText.split('|');
+                        const dateStr = parts[1].trim().split(' ');
+                        const [d, m, y] = dateStr[0].split('.');
+                        const [hr, min] = dateStr[1].split(':');
+                        const target = new Date(y, m-1, d, hr, min);
+                        if (new Date() < target) {
+                            MAC_DETAY = parts[0].trim();
+                        } else {
+                            MAC_DETAY = ""; // Süre doldu
+                        }
+                    } else {
+                        MAC_DETAY = cleanText;
+                    }
+                }
+            } catch(e) {}
+
+            // Sadece içerik gerçekten değiştiyse yeniden kur — aksi halde
+            // her 60sn'de animasyon başa sarıp gözle görülür sıçrama yapardı.
+            if (MAC_DETAY !== lastSignature) buildStrip();
+        }
+
+        // --- BAŞLATMA ---
+        initDomain();  // Domaini hafızaya al
+        renderPin();   // Sabit kısmı bas
+        buildStrip();  // Şeridi kur (veri gelmeden slogan döner)
+        updateData();  // İlk veriyi çek
+
+        // Her 60 saniyede bir veriyi sessizce güncelle (RELOAD YOK)
+        setInterval(updateData, 60000);
+
+        // Ekran genişliği değişince kopya sayısı yeniden hesaplanmalı
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(buildStrip, 150);
+        });
+    })();
+    </script>
+
+
+
+</body></html>
