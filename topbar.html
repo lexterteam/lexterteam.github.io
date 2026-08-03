@@ -60,38 +60,83 @@
             align-items: stretch;
             width: 100%;
             height: 100%;
-            background: var(--flat-bg);
-            border-top: 1px solid var(--line);
-            border-bottom: 1px solid rgba(31, 182, 236, .55);  /* --cs-main-color, header'ın alt çizgisiyle aynı dil */
+            /* Header'daki gibi ince dikey derinlik — düz renk üstünde tek katman */
+            background: linear-gradient(180deg, rgba(255,255,255,.045) 0%, rgba(255,255,255,0) 60%),
+                        var(--flat-bg);
+            border-top: 0;
+            border-bottom: 0;
             box-shadow: none;
+            overflow: hidden;
+        }
+        /* Üstte ışık çubuğu — web.css bölüm 21.1'deki .nav-content-bc::before ile aynı dil */
+        .bar::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 1px;
+            background: linear-gradient(90deg,
+                        transparent 0%,
+                        rgba(31,182,236,.30) 18%,
+                        rgba(102,227,255,.62) 50%,
+                        rgba(31,182,236,.30) 82%,
+                        transparent 100%);
+            pointer-events: none;
+        }
+        /* Altta aynı çubuk, biraz daha güçlü — barı sayfadan ayırır */
+        .bar::after {
+            content: "";
+            position: absolute;
+            inset: auto 0 0 0;
+            height: 1px;
+            background: linear-gradient(90deg,
+                        transparent 0%,
+                        rgba(31,182,236,.45) 15%,
+                        rgba(102,227,255,.8) 50%,
+                        rgba(31,182,236,.45) 85%,
+                        transparent 100%);
+            pointer-events: none;
         }
 
         /* --- 2. PIN (sabit domain) ---
            Flat: gradient panel yerine ince ayraç. Menüdeki haplarla aynı dil. */
+        /* Sabit domain bölgesi: sağa doğru sönen ince mavi ton — şeritten ayrılır */
         .pin {
+            position: relative;
             display: flex;
             align-items: center;
             gap: 10px;
             flex: 0 0 auto;
-            padding: 0 var(--pad);
-            background: transparent;
-            border-right: 1px solid var(--line);
+            padding: 0 calc(var(--pad) + 4px) 0 var(--pad);
+            background: linear-gradient(90deg,
+                        rgba(31,182,236,.14) 0%,
+                        rgba(31,182,236,.05) 65%,
+                        transparent 100%);
+            border-right: 1px solid rgba(31,182,236,.22);
             box-shadow: none;
         }
 
-        /* Canlı nokta: glow YOK (flat), sadece opaklık nabzı */
+        /* Canlı nokta: çekirdek + dışarı yayılan halka */
         .live {
+            position: relative;
             flex: 0 0 auto;
-            width: 6px;
-            height: 6px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             background: var(--accent);
-            animation: pulse 2s ease-in-out infinite;
+            box-shadow: 0 0 8px 1px rgba(31,182,236,.9);
+        }
+        .live::after {
+            content: "";
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            border: 1px solid var(--accent);
+            animation: pulse 2s ease-out infinite;
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50%      { opacity: .35; }
+            0%   { transform: scale(.6); opacity: .9; }
+            100% { transform: scale(1.9); opacity: 0; }
         }
 
         .pin-group {
@@ -120,9 +165,20 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* Sonraki domain: düz mavi (--cs-main-color) — flat zeminde okunuyor,
-           açık türeve gerek yok, glow da yok. */
-        .pin-domain.accent { color: var(--accent); }
+        /* Sonraki domain: asıl bilgi bu — degrade metin + hafif ışıma.
+           background-clip:text desteklenmezse düz mavi kalır (fallback color). */
+        .pin-domain.accent {
+            color: var(--accent);   /* emniyet: gradient desteklenmezse düz mavi */
+            text-shadow: 0 0 14px rgba(102,227,255,.25);
+        }
+        @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+            .pin-domain.accent {
+                background: linear-gradient(90deg, var(--accent), #66E3FF);
+                -webkit-background-clip: text;
+                        background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+        }
 
         .pin-arrow {
             color: rgba(255, 255, 255, .28);
