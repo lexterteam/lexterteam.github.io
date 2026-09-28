@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Betvoy Özel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Tema renkleri mobil.css'teki --cs-* değişkenlerinden gelir; yoksa varsayılanlar */
+        .betvoy-casino-section {
+            --betvoy-main: var(--cs-main-color, #1FB6EC);
+            --betvoy-second: var(--cs-button-second-color, #43D6FF);
+            --betvoy-font: var(--bv-font, "Poppins", -apple-system, "Segoe UI", Roboto, Arial, sans-serif);
+            --betvoy-visible: 5.5;   /* ekranda görünen kart sayısı */
+            --betvoy-gaps: 5;        /* görünen kartlar arasındaki boşluk sayısı */
+            --betvoy-gap: 14px;
+
+            position: relative;
+            padding: 16px 0;
+            font-family: var(--betvoy-font);
+            color: #fff;
+        }
+
+        .betvoy-casino-section *,
+        .betvoy-casino-section *::before,
+        .betvoy-casino-section *::after { box-sizing: border-box; }
+
+        /* ---- Başlık ---- */
+        .betvoy-casino-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .betvoy-casino-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+
+        .betvoy-casino-icon {
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: linear-gradient(145deg, rgba(67, 214, 255, .18), rgba(31, 182, 236, .06));
+            border: 1px solid rgba(67, 214, 255, .28);
+            box-shadow: 0 0 14px rgba(31, 182, 236, .22), inset 0 1px 0 rgba(255, 255, 255, .08);
+        }
+
+        .betvoy-casino-icon img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 4px rgba(67, 214, 255, .4));
+        }
+
+        .betvoy-casino-title > span:last-child {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: .3px;
+            line-height: 1;
+            background: linear-gradient(180deg, #ffffff 30%, #bdf3ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* ---- Oklar ---- */
+        .betvoy-casino-arrows {
+            display: flex;
+            gap: 8px;
+        }
+
+        .betvoy-casino-arrows button {
+            display: grid;
+            place-items: center;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .08);
+            color: rgba(255, 255, 255, .9);
+            cursor: pointer;
+            transition: background .2s, color .2s, border-color .2s, box-shadow .2s;
+        }
+
+        .betvoy-casino-arrows button:hover {
+            background: linear-gradient(180deg, var(--betvoy-second), var(--betvoy-main));
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 0 12px rgba(31, 182, 236, .45);
+        }
+
+        .betvoy-casino-arrows button:active { transform: scale(.94); }
+
+        .betvoy-casino-arrows button:focus-visible {
+            outline: 2px solid var(--betvoy-second);
+            outline-offset: 2px;
+        }
+
+        .betvoy-casino-arrows svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* ---- Kart şeridi ---- */
+        .betvoy-games-scroll {
+            display: flex;
+            gap: var(--betvoy-gap);
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+            overscroll-behavior-x: contain;
+            padding: 22px 0 6px;    /* görseller kartın üstünden taşabilsin */
+            cursor: grab;
+        }
+
+        .betvoy-games-scroll::-webkit-scrollbar { display: none; }
+
+        .betvoy-games-scroll.betvoy-dragging {
+            cursor: grabbing;
+            scroll-snap-type: none;
+            user-select: none;
+        }
+
+        .betvoy-games-scroll.betvoy-dragging .betvoy-game-card { pointer-events: none; }
+
+        /* ---- Promo kartı ---- */
+        .betvoy-game-card {
+            position: relative;
+            flex: 0 0 calc((100% - var(--betvoy-gaps) * var(--betvoy-gap)) / var(--betvoy-visible));
+            aspect-ratio: 250 / 124;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px 18px;
+            border-radius: 16px;
+            color: #fff;
+            text-decoration: none;
+            scroll-snap-align: start;
+            isolation: isolate;
+            /* Koyu cam zemin + sağ tarafta görselin arkasında sıcak bir ışık */
+            background:
+                radial-gradient(120% 140% at 100% 0%, rgba(255, 150, 45, .22) 0%, rgba(255, 150, 45, 0) 55%),
+                radial-gradient(90% 120% at 0% 100%, rgba(31, 182, 236, .18) 0%, rgba(31, 182, 236, 0) 60%),
+                linear-gradient(160deg, #182431 0%, #111822 100%);
+            box-shadow: 0 10px 24px -12px rgba(0, 0, 0, .7);
+            transition: transform .3s cubic-bezier(.2, .8, .2, 1), box-shadow .3s;
+        }
+
+        /* İnce degrade çerçeve */
+        .betvoy-game-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 1px;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(67, 214, 255, .55), rgba(67, 214, 255, .06) 45%, rgba(255, 160, 60, .35));
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            transition: opacity .3s;
+            opacity: .8;
+        }
+
+        /* Hover'da kartın üstünden geçen parıltı */
+        .betvoy-card-shine {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .betvoy-card-shine::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -60%;
+            width: 40%;
+            background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .08), transparent);
+            transform: skewX(-18deg);
+            transition: left .7s ease;
+        }
+
+        .betvoy-game-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 30px -12px rgba(31, 182, 236, .45);
+        }
+
+        .betvoy-game-card:hover::before { opacity: 1; }
+        .betvoy-game-card:hover .betvoy-card-shine::after { left: 130%; }
+
+        .betvoy-game-card:focus-visible {
+            outline: 2px solid var(--betvoy-second);
+            outline-offset: 3px;
+        }
+
+        .betvoy-promo-title {
+            position: relative;
+            z-index: 1;
+            max-width: 56%;
+            overflow-wrap: anywhere;
+            margin: 0;
+            font-size: clamp(15px, 1.15vw, 18px);
+            font-weight: 600;
+            line-height: 1.15;
+            letter-spacing: .1px;
+        }
+
+        .betvoy-promo-cta {
+            position: relative;
+            z-index: 1;
+            align-self: flex-start;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px 5px 12px;
+            border-radius: 999px;
+            background: rgba(31, 182, 236, .14);
+            border: 1px solid rgba(67, 214, 255, .3);
+            color: #bdf3ff;
+            font-size: 10.5px;
+            font-weight: 600;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            transition: background .25s, color .25s, border-color .25s;
+        }
+
+        .betvoy-promo-cta svg {
+            width: 10px;
+            height: 10px;
+            transition: transform .25s;
+        }
+
+        .betvoy-game-card:hover .betvoy-promo-cta {
+            background: linear-gradient(180deg, var(--betvoy-second), var(--betvoy-main));
+            border-color: transparent;
+            color: #fff;
+        }
+
+        .betvoy-game-card:hover .betvoy-promo-cta svg { transform: translateX(2px); }
+        .betvoy-game-card[target="_blank"]:hover .betvoy-promo-cta svg { transform: translate(2px, -2px); }
+
+        /* 3D görsel: sağda, kartın üstünden hafifçe taşar */
+        .betvoy-game-card img {
+            position: absolute;
+            top: -16px;
+            right: 0;
+            width: 45%;
+            height: auto;
+            aspect-ratio: 1;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .45));
+            transition: transform .4s cubic-bezier(.2, .8, .2, 1), opacity .3s;
+            opacity: 0;
+            -webkit-user-drag: none;
+        }
+
+        .betvoy-game-card.betvoy-loaded img { opacity: 1; }
+
+        .betvoy-game-card:hover img { transform: translateY(-6px) rotate(-4deg) scale(1.06); }
+
+        @media (prefers-reduced-motion: reduce) {
+            .betvoy-game-card,
+            .betvoy-game-card img,
+            .betvoy-card-shine::after { transition: none; }
+        }
+
+        @media (max-width: 1200px) {
+            .betvoy-casino-section { --betvoy-visible: 4.5; --betvoy-gaps: 4; }
+        }
+        @media (max-width: 900px) {
+            .betvoy-casino-section { --betvoy-visible: 3.3; --betvoy-gaps: 3; --betvoy-gap: 12px; }
+        }
+        @media (max-width: 600px) {
+            .betvoy-casino-section { --betvoy-visible: 1.8; --betvoy-gaps: 1; --betvoy-gap: 10px; }
+            .betvoy-casino-title > span:last-child { font-size: 16px; }
+            .betvoy-promo-title { font-size: 15px; }
+        }
+
+        /* iframe içinde şeffaf dursun; arka planı çağıran site verir */
+        html, body {
+            margin: 0;
+            background: transparent;
+        }
+    </style>
+</head>
+<body>
+
+<section class="betvoy-casino-section">
+    <div class="betvoy-casino-header">
+        <h2 class="betvoy-casino-title">
+            <span class="betvoy-casino-icon">
+                <img src="https://lexterteam.github.io/assets/betvoy-ozel/logo.png" alt="Betvoy">
+            </span>
+            <span data-text-tr="Betvoy Özel" data-text-en="Betvoy Exclusive">Betvoy Özel</span>
+        </h2>
+
+        <div class="betvoy-casino-arrows">
+            <button class="betvoy-arrow-left" type="button" aria-label="Önceki">
+                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M10 3.5 5.5 8l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <button class="betvoy-arrow-right" type="button" aria-label="Sonraki">
+                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!--
+        KART EKLEME / DÜZENLEME
+        - Site içinde açılacak link:  data-path="/yol"  (dil öneki YAZMA; /tr veya /en site tarafından eklenir)
+                                      target="_top"
+        - Yeni sekmede açılacak link: href="https://tam-adres"  target="_blank" rel="noopener"
+                                      (data-path YAZMA)
+        - Metinler: data-text-tr / data-text-en
+    -->
+    <div class="betvoy-games-scroll">
+        <a href="/tr/iframe/sport?showTo=1&amp;src=https%3A%2F%2Fjackobabot.com%2Fclaim%3Fusername%3D%7Busername%7D%26userid%3D%7Bunique_id%7D" data-path="/iframe/sport?showTo=1&amp;src=https%3A%2F%2Fjackobabot.com%2Fclaim%3Fusername%3D%7Busername%7D%26userid%3D%7Bunique_id%7D" target="_top" class="betvoy-game-card">
+            <span class="betvoy-card-shine"></span>
+            <h3 class="betvoy-promo-title" data-text-tr="Oto Bonus" data-text-en="Auto Bonus">Oto Bonus</h3>
+            <span class="betvoy-promo-cta"><span data-text-tr="Bonus Al" data-text-en="Claim">Bonus Al</span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <img data-src="https://lexterteam.github.io/assets/betvoy-ozel/oto-bonus.webp" alt="">
+        </a>
+        <a href="/tr/casino/tournaments" data-path="/casino/tournaments" target="_top" class="betvoy-game-card">
+            <span class="betvoy-card-shine"></span>
+            <h3 class="betvoy-promo-title" data-text-tr="Turnuvalar" data-text-en="Tournaments">Turnuvalar</h3>
+            <span class="betvoy-promo-cta"><span data-text-tr="Katıl" data-text-en="Join">Katıl</span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <img data-src="https://lexterteam.github.io/assets/betvoy-ozel/turnuvalar.webp" alt="">
+        </a>
+        <a href="/tr/casino/jackpot" data-path="/casino/jackpot" target="_top" class="betvoy-game-card">
+            <span class="betvoy-card-shine"></span>
+            <h3 class="betvoy-promo-title" data-text-tr="Jackpotlar" data-text-en="Jackpots">Jackpotlar</h3>
+            <span class="betvoy-promo-cta"><span data-text-tr="Oyna" data-text-en="Play">Oyna</span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <img data-src="https://lexterteam.github.io/assets/betvoy-ozel/jackpot.webp" alt="">
+        </a>
+        <a href="/tr/promotions/all" data-path="/promotions/all" target="_top" class="betvoy-game-card">
+            <span class="betvoy-card-shine"></span>
+            <h3 class="betvoy-promo-title" data-text-tr="Promosyonlar" data-text-en="Promotions">Promosyonlar</h3>
+            <span class="betvoy-promo-cta"><span data-text-tr="İncele" data-text-en="View">İncele</span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <img data-src="https://lexterteam.github.io/assets/betvoy-ozel/promosyonlar.webp" alt="">
+        </a>
+        <a href="https://betvoyaffiliate.com" target="_blank" rel="noopener" class="betvoy-game-card">
+            <span class="betvoy-card-shine"></span>
+            <h3 class="betvoy-promo-title" data-text-tr="Betvoy Ortaklık" data-text-en="Betvoy Affiliate">Betvoy Ortaklık</h3>
+            <span class="betvoy-promo-cta"><span data-text-tr="Başvur" data-text-en="Apply">Başvur</span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <img data-src="https://lexterteam.github.io/assets/betvoy-ozel/ortaklik.webp" alt="">
+        </a>
+        <a href="https://t.me/BetvoyOfficial" target="_blank" rel="noopener" class="betvoy-game-card">
+            <span class="betvoy-card-shine"></span>
+            <h3 class="betvoy-promo-title" data-text-tr="Telegram Kanalı" data-text-en="Telegram Channel">Telegram Kanalı</h3>
+            <span class="betvoy-promo-cta"><span data-text-tr="Katıl" data-text-en="Join">Katıl</span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <img data-src="https://lexterteam.github.io/assets/betvoy-ozel/telegram.webp" alt="">
+        </a>
+    </div>
+</section>
+
+<script>
+(function () {
+    /* ---- iframe: çağıran sitenin domainini ve dilini bul ----
+       Tarayıcı, farklı domaindeki iframe'e çağıran sayfanın sadece domainini verir (/tr, /en gelmez).
+       Bu yüzden dil kesin bilinmiyorsa link dilsiz verilir (https://domain/casino/...) ve site
+       kullanıcıyı kendi seçili diline yönlendirir. Dil kesin bilinirse (?lang, tam referrer
+       veya postMessage) linke eklenir. Başlık metni için tahmini dil = tarayıcı dili. */
+    var LANGS = ['tr', 'en'];
+    var params = new URLSearchParams(location.search);
+    var parentUrl = null;
+    try { if (document.referrer) parentUrl = new URL(document.referrer); } catch (e) {}
+
+    var parentOrigin = parentUrl ? parentUrl.origin
+        : (location.ancestorOrigins && location.ancestorOrigins.length ? location.ancestorOrigins[0] : '');
+    if (parentOrigin.indexOf('github.io') !== -1) parentOrigin = ''; // doğrudan açıldıysa
+
+    function langFromPath(path) {
+        var m = /^\/(tr|en)(\/|$)/i.exec(path || '');
+        return m ? m[1].toLowerCase() : null;
+    }
+    var lang = (params.get('lang') || '').toLowerCase();
+    if (LANGS.indexOf(lang) === -1) lang = parentUrl && langFromPath(parentUrl.pathname);
+    var langKnown = !!lang;
+    if (!lang) lang = /^tr/i.test(navigator.language || '') ? 'tr' : 'en';
+
+    function applyLinks() {
+        document.documentElement.lang = lang;
+        document.querySelectorAll('a[data-path]').forEach(function (a) {
+            a.href = parentOrigin + (langKnown ? '/' + lang : '') + a.getAttribute('data-path');
+        });
+    }
+
+    // Çağıran site: iframe.contentWindow.postMessage({ lang: 'en' }, '*')
+    window.addEventListener('message', function (e) {
+        if (parentOrigin && e.origin !== parentOrigin) return;
+        var l = e.data && typeof e.data.lang === 'string' ? e.data.lang.toLowerCase() : '';
+        if (LANGS.indexOf(l) !== -1) { lang = l; langKnown = true; applyLinks(); }
+    });
+
+    document.querySelectorAll('.betvoy-casino-section').forEach(function (section) {
+        var track = section.querySelector('.betvoy-games-scroll');
+
+        // .webm uzantılı <img> gelirse <video>'ya çevir
+        track.querySelectorAll('img').forEach(function (img) {
+            var src = img.getAttribute('data-src') || img.getAttribute('src') || '';
+            if (!/\.webm(\?|$)/i.test(src)) return;
+            var v = document.createElement('video');
+            v.setAttribute('data-src', src);
+            v.setAttribute('aria-label', img.alt || '');
+            v.muted = true; v.autoplay = true; v.loop = true; v.playsInline = true;
+            v.setAttribute('playsinline', '');
+            v.preload = 'none';
+            img.replaceWith(v);
+        });
+
+        // Sonsuz döngü: kartların bir kopyasını başa, bir kopyasını sona ekle
+        var originals = Array.prototype.slice.call(track.children);
+        // Az kart varsa döngü akıcı olsun diye listeyi çoğalt
+        var base = originals.slice();
+        while (originals.length < 12) {
+            base.forEach(function (card) {
+                var c = makeClone(card);
+                track.appendChild(c);
+                originals.push(c);
+            });
+        }
+        function makeClone(card) {
+            var c = card.cloneNode(true);
+            c.setAttribute('aria-hidden', 'true');
+            c.setAttribute('tabindex', '-1');
+            return c;
+        }
+        originals.forEach(function (card) { track.appendChild(makeClone(card)); });
+        originals.slice().reverse().forEach(function (card) {
+            track.insertBefore(makeClone(card), track.firstChild);
+        });
+
+        var setWidth = 0;
+        function measure() {
+            // Bir tam setin genişliği = orijinal ilk kart ile sondaki kopyanın ilk kartı arası
+            setWidth = track.children[originals.length * 2].offsetLeft - track.children[originals.length].offsetLeft;
+        }
+        function jumpTo(x) {
+            track.style.scrollSnapType = 'none';
+            track.scrollLeft = x;
+            track.style.scrollSnapType = '';
+        }
+        function normalize() {
+            if (!setWidth || (drag && drag.moved)) return;
+            var x = track.scrollLeft;
+            if (x < setWidth * 0.5) jumpTo(x + setWidth);
+            else if (x > setWidth * 1.5) jumpTo(x - setWidth);
+        }
+
+        measure();
+        jumpTo(setWidth);
+
+        if ('onscrollend' in window) {
+            track.addEventListener('scrollend', normalize);
+        } else {
+            var t;
+            track.addEventListener('scroll', function () {
+                clearTimeout(t);
+                t = setTimeout(normalize, 150);
+            });
+        }
+
+        window.addEventListener('resize', function () {
+            var ratio = setWidth ? track.scrollLeft / setWidth : 1;
+            measure();
+            jumpTo(ratio * setWidth);
+        });
+
+        // Lazy-load: kart görünür olunca kaynağı yükle
+        function load(card) {
+            var media = card.querySelector('img, video');
+            if (!media || !media.dataset.src) return;
+            var done = function () { card.classList.add('betvoy-loaded'); };
+            if (media.tagName === 'VIDEO') {
+                media.addEventListener('loadeddata', done, { once: true });
+                media.src = media.dataset.src;
+                media.play().catch(function () {});
+            } else {
+                media.addEventListener('load', done, { once: true });
+                media.src = media.dataset.src;
+            }
+            media.removeAttribute('data-src');
+        }
+
+        var cards = track.querySelectorAll('.betvoy-game-card');
+        if ('IntersectionObserver' in window) {
+            var io = new IntersectionObserver(function (entries) {
+                entries.forEach(function (e) {
+                    if (e.isIntersecting) { load(e.target); io.unobserve(e.target); }
+                });
+            }, { root: track, rootMargin: '0px 50%' });
+            cards.forEach(function (c) { io.observe(c); });
+        } else {
+            cards.forEach(load);
+        }
+
+        // Oklar: tam görünen kart sayısı kadar kaydır
+        function step() {
+            var card = originals[0];
+            var gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+            var perView = Math.max(1, Math.floor(track.clientWidth / (card.offsetWidth + gap)));
+            return perView * (card.offsetWidth + gap);
+        }
+        section.querySelector('.betvoy-arrow-left').addEventListener('click', function () {
+            normalize();
+            track.scrollBy({ left: -step(), behavior: 'smooth' });
+        });
+        section.querySelector('.betvoy-arrow-right').addEventListener('click', function () {
+            normalize();
+            track.scrollBy({ left: step(), behavior: 'smooth' });
+        });
+
+        // Mouse ile tutup sürükleme (dokunmatikte tarayıcının kendi kaydırması çalışır)
+        var drag = null;
+        var suppressClick = false;
+
+        track.addEventListener('pointerdown', function (e) {
+            if (e.pointerType !== 'mouse' || e.button !== 0) return;
+            e.preventDefault(); // metin seçimi ve yerel resim sürüklemeyi engelle
+            drag = { x: e.clientX, start: track.scrollLeft, moved: false, lastX: e.clientX, lastT: e.timeStamp, v: 0 };
+        });
+
+        window.addEventListener('pointermove', function (e) {
+            if (!drag) return;
+            var dx = e.clientX - drag.x;
+            if (!drag.moved) {
+                if (Math.abs(dx) < 5) return; // küçük titremeler tıklama sayılsın
+                drag.moved = true;
+                track.classList.add('betvoy-dragging');
+            }
+            var x = drag.start - dx;
+            // Sürüklerken de döngü: set sınırını geçince bir set geri/ileri al
+            if (x < setWidth * 0.5) { x += setWidth; drag.start += setWidth; }
+            else if (x > setWidth * 1.5) { x -= setWidth; drag.start -= setWidth; }
+            track.scrollLeft = x;
+
+            var dt = e.timeStamp - drag.lastT;
+            if (dt > 0) drag.v = (e.clientX - drag.lastX) / dt;
+            drag.lastX = e.clientX;
+            drag.lastT = e.timeStamp;
+        });
+
+        window.addEventListener('pointerup', function (e) {
+            if (!drag) return;
+            var d = drag;
+            drag = null;
+            if (!d.moved) return;
+
+            // Bırakmadan önce durduysa fırlatma yok; hızı da sınırla
+            var v = e.timeStamp - d.lastT > 100 ? 0 : Math.max(-3, Math.min(3, d.v));
+
+            suppressClick = true;
+            setTimeout(function () { suppressClick = false; }, 0);
+
+            // Bıraktığı hızla biraz daha kay, sonra en yakın karta otur
+            var gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+            var unit = originals[0].offsetWidth + gap;
+            var target = Math.round((track.scrollLeft - v * 250) / unit) * unit;
+            track.classList.remove('betvoy-dragging');
+            track.scrollTo({ left: target, behavior: 'smooth' });
+        });
+
+        // Sürükleme sonunda karta tıklanmış sayılmasın
+        track.addEventListener('click', function (e) {
+            if (suppressClick) { e.preventDefault(); e.stopPropagation(); }
+        }, true);
+        track.addEventListener('dragstart', function (e) { e.preventDefault(); });
+    });
+
+    applyLinks(); // kopyalar dahil tüm kartların linklerini ayarla
+
+    // Çağıran siteye yüksekliği bildir (isterse iframe'i buna göre boyutlandırır)
+    function postHeight() {
+        if (window.parent === window) return;
+        window.parent.postMessage({ type: 'betvoy-casino-height', height: document.documentElement.scrollHeight }, '*');
+    }
+    window.addEventListener('load', postHeight);
+    window.addEventListener('resize', postHeight);
+})();
+</script>
+
+</body>
+</html>
