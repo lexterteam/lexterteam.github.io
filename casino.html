@@ -299,8 +299,10 @@
 <script>
 (function () {
     /* ---- iframe: çağıran sitenin domainini ve dilini bul ----
-       Öncelik: 1) iframe src'deki ?lang=tr|en  2) çağıran sayfanın URL'i (referrer)
-                3) varsayılan tr. Çağıran site sonradan postMessage ile de dil gönderebilir. */
+       Tarayıcı, farklı domaindeki iframe'e çağıran sayfanın sadece domainini verir (/tr, /en gelmez).
+       Bu yüzden dil kesin bilinmiyorsa link dilsiz verilir (https://domain/casino/...) ve site
+       kullanıcıyı kendi seçili diline yönlendirir. Dil kesin bilinirse (?lang, tam referrer
+       veya postMessage) linke eklenir. Başlık metni için tahmini dil = tarayıcı dili. */
     var LANGS = ['tr', 'en'];
     var params = new URLSearchParams(location.search);
     var parentUrl = null;
@@ -315,12 +317,14 @@
         return m ? m[1].toLowerCase() : null;
     }
     var lang = (params.get('lang') || '').toLowerCase();
-    if (LANGS.indexOf(lang) === -1) lang = (parentUrl && langFromPath(parentUrl.pathname)) || 'tr';
+    if (LANGS.indexOf(lang) === -1) lang = parentUrl && langFromPath(parentUrl.pathname);
+    var langKnown = !!lang;
+    if (!lang) lang = /^tr/i.test(navigator.language || '') ? 'tr' : 'en';
 
     function applyLinks() {
         document.documentElement.lang = lang;
         document.querySelectorAll('a[data-path]').forEach(function (a) {
-            a.href = parentOrigin + '/' + lang + a.getAttribute('data-path');
+            a.href = parentOrigin + (langKnown ? '/' + lang : '') + a.getAttribute('data-path');
         });
     }
 
@@ -328,7 +332,7 @@
     window.addEventListener('message', function (e) {
         if (parentOrigin && e.origin !== parentOrigin) return;
         var l = e.data && typeof e.data.lang === 'string' ? e.data.lang.toLowerCase() : '';
-        if (LANGS.indexOf(l) !== -1 && l !== lang) { lang = l; applyLinks(); }
+        if (LANGS.indexOf(l) !== -1) { lang = l; langKnown = true; applyLinks(); }
     });
 
     document.querySelectorAll('.betvoy-casino-section').forEach(function (section) {
