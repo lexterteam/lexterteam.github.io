@@ -118,7 +118,7 @@
             scroll-snap-type: x mandatory;
             scrollbar-width: none;
             overscroll-behavior-x: contain;
-            padding: 16px 0 6px;    /* görseller kartın üstünden taşabilsin */
+            padding: 30px 0 6px;    /* görseller kartın üstünden taşabilsin */
             cursor: grab;
         }
 
@@ -136,14 +136,14 @@
         .betvoy-game-card {
             position: relative;
             flex: 0 0 calc((100% - var(--betvoy-gaps) * var(--betvoy-gap)) / var(--betvoy-visible));
-            aspect-ratio: 250 / 106;
-            min-height: 108px;       /* dar ekranda yazı + buton sığsın */
+            aspect-ratio: 250 / 88;
+            min-height: 96px;       /* dar ekranda yazı + buton sığsın */
             display: flex;
             flex-direction: column;
             justify-content: center; /* başlık ve buton alt alta, dikeyde ortada */
             align-items: flex-start;
-            gap: 13px;
-            padding: 12px 16px 12px 26px;
+            gap: 11px;
+            padding: 8px 16px 8px 26px;
             border-radius: 16px;
             color: #fff;
             text-decoration: none;
@@ -262,11 +262,10 @@
         /* 3D görsel: sağda, dikeyde ortalı, kartın üstünden hafifçe taşar */
         .betvoy-game-card img {
             position: absolute;
-            top: -12px;
-            right: 6px;
-            height: calc(100% + 18px);
-            width: auto;
-            max-width: 37%;
+            top: -28px;
+            right: -2px;
+            width: 38%;
+            height: auto;
             aspect-ratio: 1;
             object-fit: contain;
             filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .45));
