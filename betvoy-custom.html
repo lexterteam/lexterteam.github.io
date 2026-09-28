@@ -149,9 +149,9 @@
             text-decoration: none;
             scroll-snap-align: start;
             isolation: isolate;
-            /* Koyu cam zemin + sağ tarafta görselin arkasında sıcak bir ışık */
+            /* Koyu cam zemin + sağ tarafta görselin arkasında mavi bir ışık */
             background:
-                radial-gradient(120% 140% at 100% 0%, rgba(255, 150, 45, .22) 0%, rgba(255, 150, 45, 0) 55%),
+                radial-gradient(120% 140% at 100% 0%, rgba(67, 214, 255, .2) 0%, rgba(67, 214, 255, 0) 55%),
                 radial-gradient(90% 120% at 0% 100%, rgba(31, 182, 236, .18) 0%, rgba(31, 182, 236, 0) 60%),
                 linear-gradient(160deg, #182431 0%, #111822 100%);
             box-shadow: 0 10px 24px -12px rgba(0, 0, 0, .7);
@@ -165,7 +165,7 @@
             inset: 0;
             padding: 1px;
             border-radius: inherit;
-            background: linear-gradient(135deg, rgba(67, 214, 255, .55), rgba(67, 214, 255, .06) 45%, rgba(255, 160, 60, .35));
+            background: linear-gradient(135deg, rgba(67, 214, 255, .55), rgba(67, 214, 255, .06) 45%, rgba(67, 214, 255, .3));
             -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
@@ -268,7 +268,7 @@
             height: auto;
             aspect-ratio: 1;
             object-fit: contain;
-            filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .45));
+            filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .5)) drop-shadow(0 0 10px rgba(31, 182, 236, .25));
             transition: transform .4s cubic-bezier(.2, .8, .2, 1), opacity .3s;
             opacity: 0;
             -webkit-user-drag: none;
