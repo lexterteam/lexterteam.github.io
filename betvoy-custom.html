@@ -124,9 +124,6 @@
 
         .betvoy-games-scroll::-webkit-scrollbar { display: none; }
 
-        /* Otomatik kaydırma sürekli aktığı için karta mıknatıslanma kapalı */
-        .betvoy-games-scroll.betvoy-autoplay { scroll-snap-type: none; }
-
         .betvoy-games-scroll.betvoy-dragging {
             cursor: grabbing;
             scroll-snap-type: none;
@@ -600,18 +597,19 @@
         }, true);
         track.addEventListener('dragstart', function (e) { e.preventDefault(); });
 
-        // Otomatik kaydırma: yavaş ve sürekli akar; üzerine gelince, sürüklerken,
-        // dokunurken ve oklara basınca bir süre durur
-        var AUTO_SPEED = 35; // piksel / saniye
+        // Otomatik kaydırma (carousel): belli aralıklarla bir kart yumuşakça kayar;
+        // üzerine gelince, sürüklerken, dokunurken ve oklara basınca bir süre durur
+        var AUTO_DELAY = 3000;    // iki kayma arası bekleme (ms)
+        var AUTO_DURATION = 900;  // bir kaymanın süresi (ms)
         if (!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             var hovering = false;
             var pauseUntil = 0;
-            var pos = track.scrollLeft;
-            var last = null;
+            var nextAt = performance.now() + AUTO_DELAY;
+            var anim = null; // { from, to, start }
 
             function pauseFor(ms) { pauseUntil = Math.max(pauseUntil, performance.now() + ms); }
+            function easeInOut(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 
-            track.classList.add('betvoy-autoplay');
             track.addEventListener('mouseenter', function () { hovering = true; });
             track.addEventListener('mouseleave', function () { hovering = false; });
             track.addEventListener('touchstart', function () { pauseFor(4000); }, { passive: true });
@@ -622,14 +620,37 @@
             });
 
             (function tick(now) {
-                var dt = last === null ? 0 : Math.min(now - last, 100) / 1000;
-                last = now;
-                if (hovering || drag || now < pauseUntil || document.hidden || !setWidth) {
-                    pos = track.scrollLeft; // kullanıcı nerede bıraktıysa oradan devam et
-                } else {
-                    pos += AUTO_SPEED * dt;
-                    if (pos > setWidth * 1.5) pos -= setWidth; // döngü: bir set geri al
-                    track.scrollLeft = pos;
+                var busy = hovering || drag || now < pauseUntil || document.hidden || !setWidth;
+                if (anim) {
+                    if (drag) {
+                        // kullanıcı araya girdi: animasyonu bırak
+                        anim = null;
+                        track.style.scrollSnapType = '';
+                    } else {
+                        var t = Math.min(1, (now - anim.start) / AUTO_DURATION);
+                        track.scrollLeft = anim.from + (anim.to - anim.from) * easeInOut(t);
+                        if (t === 1) {
+                            anim = null;
+                            track.style.scrollSnapType = '';
+                            normalize(); // döngü sınırını geçtiyse bir set geri al
+                            nextAt = now + AUTO_DELAY;
+                        }
+                    }
+                } else if (busy) {
+                    nextAt = Math.max(nextAt, now + AUTO_DELAY); // durduktan sonra tam bekleme süresi
+                } else if (now >= nextAt) {
+                    // Hedef: sol kenarı şeridin solunu geçmiş ilk kart (gerçek konumu, yuvarlama birikmesin)
+                    var from = track.scrollLeft;
+                    var left0 = track.getBoundingClientRect().left;
+                    var to = null;
+                    for (var i = 0; i < track.children.length; i++) {
+                        var dx = track.children[i].getBoundingClientRect().left - left0;
+                        if (dx > 2) { to = from + dx; break; }
+                    }
+                    if (to !== null) {
+                        anim = { from: from, to: to, start: now };
+                        track.style.scrollSnapType = 'none'; // animasyon sırasında mıknatıslanma araya girmesin
+                    }
                 }
                 requestAnimationFrame(tick);
             })(performance.now());
